@@ -28,7 +28,7 @@
       <p style="color:var(--text2);font-size:14px">Login to access your solar dashboard</p>
     </div>
     <div class="card fade-up fade-up-d1" id="loginCard">
-      <form onsubmit="handleLogin(event)">
+      <form id="loginForm">
         <div class="input-group">
           <label>Username</label>
           <input type="text" id="username" placeholder="Enter your username" required autocomplete="username">
@@ -52,36 +52,39 @@
   </div>
 </div>
 
+<script src="app.js"></script>
 <script>
-function handleLogin(e) {
-  e.preventDefault();
-  const btn = document.getElementById('loginBtn');
-  const errEl = document.getElementById('loginError');
-  const card = document.getElementById('loginCard');
-  errEl.classList.add('hidden');
-  btn.textContent = '🔄 Authenticating...';
-  btn.disabled = true;
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('loginBtn');
+    var errEl = document.getElementById('loginError');
+    var card = document.getElementById('loginCard');
+    errEl.classList.add('hidden');
+    btn.textContent = '🔄 Authenticating...';
+    btn.disabled = true;
 
-  setTimeout(() => {
-    const result = APP.login(
-      document.getElementById('username').value.trim(),
-      document.getElementById('password').value
-    );
-    if (result.error) {
-      errEl.textContent = result.error;
-      errEl.classList.remove('hidden');
-      card.classList.add('warning-flash');
-      setTimeout(() => card.classList.remove('warning-flash'), 600);
-      btn.textContent = '⚡ Login to Dashboard';
-      btn.disabled = false;
-    } else {
-      btn.textContent = '✅ Success!';
-      btn.style.background = 'var(--green)';
-      APP.toast(`Welcome back, ${result.user.name}!`, 'success');
-      setTimeout(() => window.location.href = 'dashboard.html', 800);
-    }
-  }, 1200);
-}
+    setTimeout(function() {
+      var result = APP.login(
+        document.getElementById('username').value.trim(),
+        document.getElementById('password').value
+      );
+      if (result.error) {
+        errEl.textContent = result.error;
+        errEl.classList.remove('hidden');
+        card.classList.add('warning-flash');
+        setTimeout(function() { card.classList.remove('warning-flash'); }, 600);
+        btn.textContent = '⚡ Login to Dashboard';
+        btn.disabled = false;
+      } else {
+        btn.textContent = '✅ Success!';
+        btn.style.background = 'var(--green)';
+        APP.toast('Welcome back, ' + result.user.name + '!', 'success');
+        setTimeout(function() { window.location.href = 'dashboard.html'; }, 800);
+      }
+    }, 1200);
+  });
+});
 </script>
 </body>
 </html>
