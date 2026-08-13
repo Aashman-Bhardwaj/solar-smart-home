@@ -27,7 +27,6 @@
     <h1 class="section-title">Calculate Your <span class="text-accent">Solar Setup</span></h1>
     <p class="section-sub">Enter your daily electricity consumption and let algebra do the rest.</p>
   </div>
-
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start" class="fade-up fade-up-d1">
     <div class="card" id="calcCard">
       <h3 style="font-size:18px;font-weight:600;margin-bottom:20px">📊 Input Your Usage</h3>
@@ -44,14 +43,12 @@
         <input type="number" id="sunHours" placeholder="5" step="0.5" min="1" max="12" value="5">
       </div>
       <button onclick="runCalculation()" class="btn btn-primary w-full" style="justify-content:center;padding:16px;font-size:15px" id="calcBtn">🧮 Calculate Solar Setup</button>
-
       <div class="formula-box mt-4">
         <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">The Formula</div>
         <div class="formula">N = E ÷ (P × S)</div>
         <div class="desc">N = Panels | E = Daily kWh | P = Panel kW | S = Sun Hours</div>
       </div>
     </div>
-
     <div id="resultsArea" style="display:none">
       <div class="result-card mb-4">
         <div class="big-num" id="resPanels">0</div>
@@ -83,31 +80,35 @@
   </div>
 </div>
 
+<script src="app.js"></script>
 <script>
-let costChartInstance = null;
-const session = APP.requireAuth();
+var costChartInstance = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  var session = APP.requireAuth();
+  if (session) {
+    document.getElementById('mainContent').style.display = 'block';
+    APP.updateNav();
+  }
+});
 
 function runCalculation() {
-  const kwh = parseFloat(document.getElementById('dailyKWh').value);
-  const panel = parseFloat(document.getElementById('panelOutput').value);
-  const sun = parseFloat(document.getElementById('sunHours').value);
+  var kwh = parseFloat(document.getElementById('dailyKWh').value);
+  var panel = parseFloat(document.getElementById('panelOutput').value);
+  var sun = parseFloat(document.getElementById('sunHours').value);
   if (!kwh || kwh <= 0) { APP.toast('Enter valid daily consumption!', 'error'); return; }
-
-  const btn = document.getElementById('calcBtn');
+  var btn = document.getElementById('calcBtn');
   btn.textContent = '🌀 Algebra engine processing...';
   btn.disabled = true;
-
-  setTimeout(() => {
-    const result = APP.calculate(kwh, panel, sun);
+  setTimeout(function() {
+    var result = APP.calculate(kwh, panel, sun);
     APP.saveCalculation(result);
-
     document.getElementById('resultsArea').style.display = 'block';
     APP.animateCounter(document.getElementById('resPanels'), result.panelsNeeded, 1000);
     document.getElementById('resCost').textContent = '₹' + result.annualCost.toLocaleString();
     document.getElementById('resSavings').textContent = '₹' + Math.max(0, result.annualSavings).toLocaleString();
     document.getElementById('resCO2').textContent = result.co2Reduction.toFixed(0) + ' kg';
     document.getElementById('resCurrent').textContent = result.currentGenerated.toFixed(1) + ' A';
-
     if (costChartInstance) costChartInstance.destroy();
     costChartInstance = new Chart(document.getElementById('costChart'), {
       type: 'bar',
@@ -122,17 +123,11 @@ function runCalculation() {
       },
       options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#737373' }, grid: { color: 'rgba(255,255,255,.05)' } }, x: { ticks: { color: '#a3a3a3' }, grid: { display: false } } } }
     });
-
     btn.textContent = '🧮 Calculate Solar Setup';
     btn.disabled = false;
     APP.confetti();
-    APP.toast(`${result.panelsNeeded} panels needed! Saved to history.`, 'success');
+    APP.toast(result.panelsNeeded + ' panels needed! Saved to history.', 'success');
   }, 1500);
-}
-
-if (session) {
-  document.getElementById('mainContent').style.display = 'block';
-  APP.updateNav();
 }
 </script>
 </body>
