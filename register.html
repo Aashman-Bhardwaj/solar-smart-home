@@ -25,7 +25,7 @@
       <p style="color:var(--text2);font-size:14px">Create your account and start calculating solar savings</p>
     </div>
     <div class="card fade-up fade-up-d1" id="regCard">
-      <form onsubmit="handleRegister(event)">
+      <form id="regForm">
         <div class="input-group">
           <label>Full Name</label>
           <input type="text" id="fullname" placeholder="Your full name" required>
@@ -57,36 +57,41 @@
   </div>
 </div>
 
+<script src="app.js"></script>
 <script>
-function handleRegister(e) {
-  e.preventDefault();
-  const btn = document.getElementById('regBtn');
-  const errEl = document.getElementById('regError');
-  errEl.classList.add('hidden');
-  btn.textContent = '🌀 Creating your solar profile...';
-  btn.disabled = true;
-  setTimeout(() => {
-    const result = APP.register(
-      document.getElementById('username').value.trim(),
-      document.getElementById('password').value,
-      document.getElementById('fullname').value.trim()
-    );
-    if (result.error) {
-      errEl.textContent = result.error; errEl.classList.remove('hidden');
-      btn.textContent = '⚡ Create Account'; btn.disabled = false;
-    } else {
-      APP.loadDB();
-      const user = APP.db.users.find(u => u.username === document.getElementById('username').value.trim());
-      if(user) user.country = document.getElementById('country').value;
-      APP.saveDB();
-      btn.textContent = '🎉 Account Created!';
-      btn.style.background = 'var(--green)';
-      APP.confetti();
-      APP.toast('Account created! Redirecting to login...', 'success');
-      setTimeout(() => window.location.href = 'login.html', 1500);
-    }
-  }, 1500);
-}
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('regForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var btn = document.getElementById('regBtn');
+    var errEl = document.getElementById('regError');
+    errEl.classList.add('hidden');
+    btn.textContent = '🌀 Creating your solar profile...';
+    btn.disabled = true;
+    setTimeout(function() {
+      var result = APP.register(
+        document.getElementById('username').value.trim(),
+        document.getElementById('password').value,
+        document.getElementById('fullname').value.trim()
+      );
+      if (result.error) {
+        errEl.textContent = result.error;
+        errEl.classList.remove('hidden');
+        btn.textContent = '⚡ Create Account';
+        btn.disabled = false;
+      } else {
+        APP.loadDB();
+        var user = APP.db.users.find(function(u) { return u.username === document.getElementById('username').value.trim(); });
+        if (user) user.country = document.getElementById('country').value;
+        APP.saveDB();
+        btn.textContent = '🎉 Account Created!';
+        btn.style.background = 'var(--green)';
+        APP.confetti();
+        APP.toast('Account created! Redirecting to login...', 'success');
+        setTimeout(function() { window.location.href = 'login.html'; }, 1500);
+      }
+    }, 1500);
+  });
+});
 </script>
 </body>
 </html>
