@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>What Does This Project Do - Solar Smart Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo"><div class="sun"></div>Solar Smart Home</div>
+  <button class="mobile-toggle" onclick="APP.mobileToggle()">☰</button>
+  <div class="nav-links">
+    <a href="index.html">Home</a><a href="how-it-extracts.html">How It Works</a><a href="members.html">Members</a>
+    <a href="leaderboard.html">Leaderboard</a><a href="graphs.html">Analytics</a>
+  </div>
+  <div class="nav-user">
+    <span class="nav-username"></span>
+    <a href="login.html" class="btn btn-primary btn-sm auth-link">Login</a>
+    <a href="dashboard.html" class="btn btn-secondary btn-sm user-link hidden">Dashboard</a>
+    <button onclick="APP.logout()" class="btn btn-ghost btn-sm user-link hidden">Logout</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header fade-up">
+    <div class="badge badge-amber">❓ What It Does</div>
+    <h1 class="section-title">What Does This Project <span class="text-accent">Actually Do?</span></h1>
+    <p class="section-sub">Turning a confusing solar decision into a simple, data-backed one — using algebra.</p>
+  </div>
+
+  <div class="card fade-up" style="padding:40px;margin-bottom:32px;border-left:4px solid var(--accent)">
+    <h2 style="font-size:24px;margin-bottom:16px">🎯 The Short Answer</h2>
+    <p style="font-size:16px;line-height:1.8;color:var(--text2)">You enter your electricity usage → the system calculates the <strong style="color:var(--text)">exact number of solar panels</strong> you need, the <strong style="color:var(--green)">cost savings</strong>, and the <strong style="color:#06b6d4">environmental benefit</strong> — instantly.</p>
+  </div>
+
+  <div class="glow-line"></div>
+
+  <h2 style="font-size:28px;font-weight:600;margin-bottom:24px" class="fade-up fade-up-d1">The Problem It Solves</h2>
+  <div class="card-grid fade-up fade-up-d2">
+    <div class="card" style="border-top:3px solid var(--red)">
+      <div style="font-size:36px;margin-bottom:12px">📈</div>
+      <h3 style="margin-bottom:8px">Rising Bills</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6">Electricity costs keep climbing, but most households guess at solar sizing instead of calculating it.</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--accent)">
+      <div style="font-size:36px;margin-bottom:12px">🤷</div>
+      <h3 style="margin-bottom:8px">No Simple Tool</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6">Families rarely have an easy way to match their real energy use to the right panel count.</p>
+    </div>
+    <div class="card" style="border-top:3px solid #8b5cf6">
+      <div style="font-size:36px;margin-bottom:12px">💸</div>
+      <h3 style="margin-bottom:8px">Missed Savings</h3>
+      <p style="font-size:13px;color:var(--text2);line-height:1.6">Wrong-sized systems waste money — either overspending on panels or under-covering usage.</p>
+    </div>
+  </div>
+
+  <div class="glow-line"></div>
+
+  <h2 style="font-size:28px;font-weight:600;margin-bottom:24px" class="fade-up fade-up-d3">What The System Outputs</h2>
+  <div class="steps fade-up fade-up-d4">
+    <div class="card step">
+      <h3>🔢 Panels Required</h3>
+      <p>The exact number of solar panels needed to meet the household's daily energy demand.</p>
+    </div>
+    <div class="card step">
+      <h3>💰 Estimated Electricity Cost</h3>
+      <p>Projects current electricity spend based on entered consumption and local tariff rates (₹8/kWh).</p>
+    </div>
+    <div class="card step">
+      <h3>✅ Annual Savings</h3>
+      <p>Calculates how much the household saves each year after switching to solar power.</p>
+    </div>
+    <div class="card step">
+      <h3>🌍 Environmental Benefit</h3>
+      <p>Estimates the reduction in CO₂ emissions from replacing grid power with solar energy.</p>
+    </div>
+  </div>
+
+  <div class="glow-line"></div>
+  <div class="text-center fade-up">
+    <div class="card" style="display:inline-block;padding:40px 56px">
+      <p style="font-size:18px;color:var(--text2);line-height:1.8;max-width:500px"><strong style="color:var(--accent)">Solar Smart Home proves</strong> that algebra isn't just a subject in a textbook — it's a real tool that helps families cut costs, save energy, and protect the environment.</p>
+      <a href="register.html" class="btn btn-primary mt-4">Try It Now →</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Live Leaderboard - Solar Smart Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo"><div class="sun"></div>Solar Smart Home</div>
+  <button class="mobile-toggle" onclick="APP.mobileToggle()">☰</button>
+  <div class="nav-links">
+    <a href="index.html">Home</a><a href="dashboard.html">Calculator</a><a href="graphs.html">Analytics</a>
+    <a href="members.html">Members</a><a href="admin.html" class="auth-link">Admin</a>
+  </div>
+  <div class="nav-user">
+    <span class="nav-username"></span>
+    <a href="login.html" class="btn btn-primary btn-sm auth-link">Login</a>
+    <a href="dashboard.html" class="btn btn-secondary btn-sm user-link hidden">Dashboard</a>
+    <button onclick="APP.logout()" class="btn btn-ghost btn-sm user-link hidden">Logout</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header fade-up">
+    <div class="badge badge-amber">🏆 Live Leaderboard</div>
+    <h1 class="section-title">Global Solar <span class="text-accent">Leaderboard</span></h1>
+    <p class="section-sub">Real-time ranking of users by current generated from their solar panels. Updated automatically.</p>
+  </div>
+
+  <div class="stat-grid fade-up fade-up-d1">
+    <div class="stat-box">
+      <div class="num" id="lbTotalUsers">0</div>
+      <div class="label">Total Tracked</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="lbOnline">0</div>
+      <div class="label">Online Now</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="lbBots">0</div>
+      <div class="label">Bots Detected</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="lbTotalCurrent">0</div>
+      <div class="label">Total Current (A)</div>
+    </div>
+  </div>
+
+  <div class="card fade-up fade-up-d2" style="padding:0;overflow:hidden">
+    <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:glow-pulse 1.5s ease infinite"></div>
+        <span style="font-size:13px;color:var(--green);font-weight:500">LIVE</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="filterLB('all')" class="btn btn-sm btn-primary lb-filter active" data-filter="all">All</button>
+        <button onclick="filterLB('users')" class="btn btn-sm btn-ghost lb-filter" data-filter="users">Users</button>
+        <button onclick="filterLB('bots')" class="btn btn-sm btn-ghost lb-filter" data-filter="bots">🤖 Bots</button>
+      </div>
+    </div>
+    <div class="leaderboard-header">
+      <div>Rank</div><div>User</div><div>Current (A)</div><div>Panels</div><div>Status</div>
+    </div>
+    <div id="leaderboardBody" style="max-height:600px;overflow-y:auto"></div>
+  </div>
+
+  <div class="card fade-up fade-up-d3 mt-8" style="border:1px solid rgba(239,68,68,.2);background:rgba(239,68,68,.03)">
+    <h3 style="font-size:16px;margin-bottom:12px;color:var(--red)">🤖 Crawler Detection Log</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">The system automatically detects and logs web crawlers/bots that access the website. Their IDs are displayed on the leaderboard with a 🤖 badge.</p>
+    <div id="crawlerLog" style="font-family:monospace;font-size:11px;color:var(--muted);max-height:150px;overflow-y:auto;line-height:1.8">Waiting for crawler activity...</div>
+  </div>
+</div>
+
+<script>
+let currentFilter = 'all';
+function renderLeaderboard() {
+  let lb = APP.getLeaderboard();
+  // Simulate small fluctuations
+  lb.forEach(e => { if(!e.isBot) e.current += (Math.random()-.5)*.2; });
+  lb.sort((a,b) => b.current - a.current);
+  lb.forEach((e,i) => e.rank = i+1);
+  localStorage.setItem('solarLeaderboard', JSON.stringify(lb));
+
+  let filtered = lb;
+  if (currentFilter === 'users') filtered = lb.filter(e => !e.isBot);
+  if (currentFilter === 'bots') filtered = lb.filter(e => e.isBot);
+
+  const body = document.getElementById('leaderboardBody');
+  body.innerHTML = filtered.map(e => `
+    <div class="leaderboard-row" style="${e.isBot?'opacity:.6;background:rgba(239,68,68,.02)':''}">
+      <div class="rank ${e.rank<=3?'top':''}">${e.rank<=3?'🏅':'#'+e.rank}</div>
+      <div class="user-info">
+        <span class="flag">${e.flag}</span>
+        <div>
+          <div class="name">${e.name} ${e.isBot?'<span style="font-size:10px">🤖</span>':''}</div>
+          <div class="id">${e.id}</div>
+        </div>
+      </div>
+      <div class="current">${e.current.toFixed(1)} A</div>
+      <div class="panels">${e.panels || '—'}</div>
+      <div class="status"><span class="badge ${e.status==='online'?'badge-green':e.status==='crawling'?'badge-red':'badge-white'}">${e.status}</span></div>
+    </div>
+  `).join('');
+
+  document.getElementById('lbTotalUsers').textContent = lb.length;
+  document.getElementById('lbOnline').textContent = lb.filter(e=>e.status==='online').length;
+  document.getElementById('lbBots').textContent = lb.filter(e=>e.isBot).length;
+  document.getElementById('lbTotalCurrent').textContent = lb.reduce((s,e)=>s+e.current,0).toFixed(0);
+}
+
+function filterLB(f) {
+  currentFilter = f;
+  document.querySelectorAll('.lb-filter').forEach(b => {
+    b.classList.toggle('btn-primary', b.dataset.filter === f);
+    b.classList.toggle('btn-ghost', b.dataset.filter !== f);
+  });
+  renderLeaderboard();
+}
+
+// Simulate bot detection
+function simulateBot() {
+  if (Math.random() > 0.7) {
+    APP.addBotToLeaderboard();
+    const log = document.getElementById('crawlerLog');
+    const bots = ['Googlebot/2.1','Bingbot/2.0','Slurp/3.0','DuckDuckBot/1.1','AhrefsBot/7.0','SemrushBot/3.0','MJ12bot/1.0'];
+    const bot = bots[Math.floor(Math.random()*bots.length)];
+    const ip = `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+    log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] DETECTED: ${bot} | IP: ${ip} | Status: BLOCKED</div>` + log.innerHTML;
+  }
+}
+
+renderLeaderboard();
+setInterval(renderLeaderboard, 5000);
+setInterval(simulateBot, 8000);
+APP.updateNav();
+</script>
+</body>
+</html>

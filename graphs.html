@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Graph Analytics - Solar Smart Home</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo"><div class="sun"></div>Solar Smart Home</div>
+  <button class="mobile-toggle" onclick="APP.mobileToggle()">☰</button>
+  <div class="nav-links">
+    <a href="index.html">Home</a><a href="dashboard.html">Calculator</a><a href="history.html">History</a>
+    <a href="prediction.html">Predictions</a><a href="leaderboard.html">Leaderboard</a>
+  </div>
+  <div class="nav-user">
+    <span class="nav-username"></span>
+    <a href="login.html" class="btn btn-primary btn-sm auth-link">Login</a>
+    <a href="dashboard.html" class="btn btn-secondary btn-sm user-link hidden">Dashboard</a>
+    <button onclick="APP.logout()" class="btn btn-ghost btn-sm user-link hidden">Logout</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header fade-up">
+    <div class="badge badge-amber">📊 Analytics</div>
+    <h1 class="section-title">Graph <span class="text-accent">Analytics</span></h1>
+    <p class="section-sub">Visual breakdown of solar energy data, costs, and environmental impact.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+    <div class="chart-container fade-up">
+      <h3>📈 Panel Output vs Consumption (24h)</h3>
+      <canvas id="chart1" height="220"></canvas>
+    </div>
+    <div class="chart-container fade-up fade-up-d1">
+      <h3>💰 Monthly Cost Comparison</h3>
+      <canvas id="chart2" height="220"></canvas>
+    </div>
+    <div class="chart-container fade-up fade-up-d2">
+      <h3>🌍 CO₂ Reduction Over Time</h3>
+      <canvas id="chart3" height="220"></canvas>
+    </div>
+    <div class="chart-container fade-up fade-up-d3">
+      <h3>⚡ Energy Source Distribution</h3>
+      <canvas id="chart4" height="220"></canvas>
+    </div>
+    <div class="chart-container fade-up fade-up-d4" style="grid-column:1/-1">
+      <h3>🏠 Regional Solar Adoption (Simulated)</h3>
+      <canvas id="chart5" height="160"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const hours = Array.from({length:24}, (_,i) => i+':00');
+  const consumption = [1.2,0.8,0.6,0.5,0.5,0.7,1.5,2.8,3.5,3.2,2.8,2.5,2.8,3.0,2.9,2.7,3.1,3.8,4.2,3.8,3.2,2.5,1.8,1.4];
+  const solar = hours.map((_,i) => i>=6&&i<=18 ? Math.sin((i-6)/12*Math.PI)*2.8 : 0);
+
+  new Chart(document.getElementById('chart1'), {
+    type:'line', data:{ labels:hours, datasets:[
+      {label:'Consumption (kWh)',data:consumption,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.1)',fill:true,tension:.4},
+      {label:'Solar Output (kWh)',data:solar,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.4}
+    ]}, options:{responsive:true,plugins:{legend:{labels:{color:'#a3a3a3'}}},scales:{y:{ticks:{color:'#737373'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#737373',maxTicksLimit:12},grid:{display:false}}}}
+  });
+
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  new Chart(document.getElementById('chart2'), {
+    type:'bar', data:{ labels:months, datasets:[
+      {label:'Grid Cost (₹)',data:months.map(()=>Math.floor(2000+Math.random()*1500)),backgroundColor:'rgba(239,68,68,.5)',borderRadius:6},
+      {label:'Solar Cost (₹)',data:months.map(()=>Math.floor(800+Math.random()*400)),backgroundColor:'rgba(245,158,11,.5)',borderRadius:6}
+    ]}, options:{responsive:true,plugins:{legend:{labels:{color:'#a3a3a3'}}},scales:{y:{ticks:{color:'#737373'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#737373'},grid:{display:false}}}}
+  });
+
+  new Chart(document.getElementById('chart3'), {
+    type:'line', data:{ labels:months, datasets:[
+      {label:'CO₂ Reduced (kg)',data:months.map((_,i)=>(i+1)*85+Math.random()*30),borderColor:'#06b6d4',backgroundColor:'rgba(6,182,212,.1)',fill:true,tension:.3}
+    ]}, options:{responsive:true,plugins:{legend:{labels:{color:'#a3a3a3'}}},scales:{y:{ticks:{color:'#737373'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#737373'},grid:{display:false}}}}
+  });
+
+  new Chart(document.getElementById('chart4'), {
+    type:'doughnut', data:{ labels:['Solar','Grid','Wind','Other'], datasets:[{
+      data:[45,35,12,8], backgroundColor:['rgba(245,158,11,.7)','rgba(239,68,68,.7)','rgba(6,182,212,.7)','rgba(255,255,255,.15)'], borderWidth:0
+    }]}, options:{responsive:true,plugins:{legend:{labels:{color:'#a3a3a3',padding:16}}}}
+  });
+
+  new Chart(document.getElementById('chart5'), {
+    type:'bar', data:{ labels:['India','USA','Germany','China','Japan','Australia','Brazil','UAE','UK','South Africa'],
+    datasets:[{label:'Panels Installed (thousands)',data:[1200,850,620,1100,480,390,280,150,340,95],
+    backgroundColor:'rgba(245,158,11,.4)',borderColor:'#f59e0b',borderWidth:1,borderRadius:6}]
+    }, options:{indexAxis:'y',responsive:true,plugins:{legend:{labels:{color:'#a3a3a3'}}},scales:{x:{ticks:{color:'#737373'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#a3a3a3'},grid:{display:false}}}}
+  });
+});
+</script>
+</body>
+</html>

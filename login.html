@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Login - Solar Smart Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo"><div class="sun"></div>Solar Smart Home</div>
+  <button class="mobile-toggle" onclick="APP.mobileToggle()">☰</button>
+  <div class="nav-links">
+    <a href="index.html">Home</a><a href="what-it-does.html">What It Does</a><a href="members.html">Members</a>
+    <a href="leaderboard.html">Leaderboard</a><a href="admin.html" class="auth-link">Admin</a>
+  </div>
+  <div class="nav-user">
+    <span class="nav-username"></span>
+    <a href="register.html" class="btn btn-ghost btn-sm auth-link">Register</a>
+    <a href="dashboard.html" class="btn btn-secondary btn-sm user-link hidden">Dashboard</a>
+  </div>
+</nav>
+
+<div class="container-sm" style="display:flex;align-items:center;min-height:100vh">
+  <div style="width:100%">
+    <div class="text-center mb-8 fade-up">
+      <div style="width:80px;height:80px;background:var(--accent);border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 0 60px var(--glow),0 0 120px var(--glow);animation:pulse-sun 2s ease-in-out infinite">⚡</div>
+      <h1 style="font-size:32px;font-weight:600;margin-bottom:8px">Welcome Back</h1>
+      <p style="color:var(--text2);font-size:14px">Login to access your solar dashboard</p>
+    </div>
+    <div class="card fade-up fade-up-d1" id="loginCard">
+      <form onsubmit="handleLogin(event)">
+        <div class="input-group">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Enter your username" required autocomplete="username">
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+        </div>
+        <div id="loginError" class="hidden" style="color:var(--red);font-size:13px;margin-bottom:16px;padding:12px;background:rgba(239,68,68,.1);border-radius:8px;border:1px solid rgba(239,68,68,.2)"></div>
+        <button type="submit" class="btn btn-primary w-full" style="justify-content:center;padding:16px" id="loginBtn">
+          ⚡ Login to Dashboard
+        </button>
+      </form>
+      <div style="text-align:center;margin-top:20px">
+        <p style="font-size:13px;color:var(--muted)">Don't have an account? <a href="register.html" style="color:var(--accent);font-weight:500">Register here</a></p>
+      </div>
+    </div>
+    <div class="text-center mt-4 fade-up fade-up-d2">
+      <a href="admin.html" style="font-size:12px;color:var(--muted)">🔑 Admin Access</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const errEl = document.getElementById('loginError');
+  const card = document.getElementById('loginCard');
+  errEl.classList.add('hidden');
+  btn.textContent = '🔄 Authenticating...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    const result = APP.login(
+      document.getElementById('username').value.trim(),
+      document.getElementById('password').value
+    );
+    if (result.error) {
+      errEl.textContent = result.error;
+      errEl.classList.remove('hidden');
+      card.classList.add('warning-flash');
+      setTimeout(() => card.classList.remove('warning-flash'), 600);
+      btn.textContent = '⚡ Login to Dashboard';
+      btn.disabled = false;
+    } else {
+      btn.textContent = '✅ Success!';
+      btn.style.background = 'var(--green)';
+      APP.toast(`Welcome back, ${result.user.name}!`, 'success');
+      setTimeout(() => window.location.href = 'dashboard.html', 800);
+    }
+  }, 1200);
+}
+</script>
+</body>
+</html>

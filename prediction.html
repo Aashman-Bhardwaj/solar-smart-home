@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Voltage Limit Breaker - Solar Smart Home</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo"><div class="sun"></div>Solar Smart Home</div>
+  <button class="mobile-toggle" onclick="APP.mobileToggle()">☰</button>
+  <div class="nav-links">
+    <a href="index.html">Home</a><a href="dashboard.html">Calculator</a><a href="graphs.html">Analytics</a>
+    <a href="history.html">History</a><a href="leaderboard.html">Leaderboard</a>
+  </div>
+  <div class="nav-user">
+    <span class="nav-username"></span>
+    <a href="login.html" class="btn btn-primary btn-sm auth-link">Login</a>
+    <button onclick="APP.logout()" class="btn btn-ghost btn-sm user-link hidden">Logout</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-header fade-up">
+    <div class="badge badge-red">⚠️ Voltage Limit Breaker</div>
+    <h1 class="section-title">Future <span class="text-red">Prediction</span></h1>
+    <p class="section-sub">Predicts voltage levels from your solar panels and alerts when limits may be exceeded.</p>
+  </div>
+
+  <div class="card fade-up fade-up-d1" style="margin-bottom:24px">
+    <div style="display:flex;gap:16px;align-items:end;flex-wrap:wrap">
+      <div class="input-group" style="margin-bottom:0;flex:1;min-width:150px">
+        <label>Number of Panels</label>
+        <input type="number" id="predPanels" value="10" min="1" max="100">
+      </div>
+      <div class="input-group" style="margin-bottom:0;flex:1;min-width:150px">
+        <label>Prediction Hours</label>
+        <input type="number" id="predHours" value="48" min="1" max="168">
+      </div>
+      <button onclick="runPrediction()" class="btn btn-danger" id="predBtn" style="height:50px">⚡ Run Prediction</button>
+    </div>
+  </div>
+
+  <div id="predResults" style="display:none">
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:start;margin-bottom:24px">
+      <div class="card text-center fade-up">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:16px">Current Voltage</div>
+        <div class="gauge" id="voltageGauge">
+          <div><div class="value" id="gaugeVal">230</div><div class="unit">Volts</div></div>
+        </div>
+        <div style="margin-top:16px" id="gaugeStatus"><span class="badge badge-green">● SAFE</span></div>
+      </div>
+      <div>
+        <div class="card fade-up fade-up-d1" style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-size:16px">⚠️ Limit Break Alerts</h3>
+            <span class="badge badge-red" id="alertCount">0 Alerts</span>
+          </div>
+          <div id="alertList" style="max-height:200px;overflow-y:auto;font-size:13px;color:var(--text2)">No alerts — all clear!</div>
+        </div>
+        <div class="card fade-up fade-up-d2">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Voltage Thresholds</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+            <div style="width:12px;height:12px;border-radius:3px;background:var(--green)"></div>
+            <span style="font-size:13px">Safe: 220V – 250V</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+            <div style="width:12px;height:12px;border-radius:3px;background:var(--accent)"></div>
+            <span style="font-size:13px">Warning: 250V – 260V</span>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="width:12px;height:12px;border-radius:3px;background:var(--red)"></div>
+            <span style="font-size:13px">DANGER: Above 260V — LIMIT BREAK!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-container fade-up fade-up-d3">
+      <h3>📊 Predicted Voltage Over Time</h3>
+      <canvas id="predChart" height="180"></canvas>
+    </div>
+
+    <div class="chart-container fade-up fade-up-d4">
+      <h3>☀️ Sunlight Intensity & Current Output</h3>
+      <canvas id="predChart2" height="160"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+let predChartInst = null, predChart2Inst = null;
+function runPrediction() {
+  const panels = parseInt(document.getElementById('predPanels').value) || 10;
+  const hours = parseInt(document.getElementById('predHours').value) || 48;
+  document.getElementById('predBtn').textContent = '🔮 Predicting future...';
+  document.getElementById('predBtn').disabled = true;
+  setTimeout(() => {
+    const predictions = APP.predictVoltage(panels, hours);
+    document.getElementById('predResults').style.display = 'block';
+    const maxV = Math.max(...predictions.map(p => parseFloat(p.voltage)));
+    const gauge = document.getElementById('voltageGauge');
+    const gaugeVal = document.getElementById('gaugeVal');
+    gaugeVal.textContent = maxV.toFixed(0);
+    gauge.className = 'gauge ' + (maxV > 260 ? 'warning' : 'safe');
+    document.getElementById('gaugeStatus').innerHTML = maxV > 260 ?
+      '<span class="badge badge-red" style="animation:shake .5s ease infinite">● LIMIT BREAK!</span>' :
+      maxV > 250 ? '<span class="badge badge-amber">● WARNING</span>' :
+      '<span class="badge badge-green">● SAFE</span>';
+
+    const alerts = predictions.filter(p => p.isLimitBreak);
+    document.getElementById('alertCount').textContent = alerts.length + ' Alert' + (alerts.length!==1?'s':'');
+    document.getElementById('alertList').innerHTML = alerts.length === 0 ?
+      '<div style="color:var(--green)">✅ No limit break predicted in the next ' + hours + ' hours.</div>' :
+      alerts.map(a => `<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)"><span style="color:var(--red)">🔴 ${a.time}</span> — ${a.voltage}V (Sunlight: ${a.sunlight}%)</div>`).join('');
+
+    if(predChartInst) predChartInst.destroy();
+    if(predChart2Inst) predChart2Inst.destroy();
+
+    const labels = predictions.map(p => p.time.split(', ').pop() || p.time);
+    const voltages = predictions.map(p => parseFloat(p.voltage));
+
+    predChartInst = new Chart(document.getElementById('predChart'), {
+      type:'line', data:{labels, datasets:[
+        {label:'Voltage (V)',data:voltages,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.1)',fill:true,tension:.3,pointRadius:0},
+        {label:'Safe Limit (250V)',data:labels.map(()=>250),borderColor:'rgba(245,158,11,.5)',borderDash:[5,5],pointRadius:0,fill:false},
+        {label:'DANGER (260V)',data:labels.map(()=>260),borderColor:'rgba(239,68,68,.5)',borderDash:[5,5],pointRadius:0,fill:false}
+      ]}, options:{responsive:true,plugins:{legend:{labels:{color:'#a3a3a3'}}},scales:{y:{min:220,max:270,ticks:{color:'#737373'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#737373',maxTicksLimit:12},grid:{display:false}}}}
+    });
+
+    predChart2Inst = new Chart(document.getElementById('predChart2'), {
+      type:'line', data:{labels, datasets:[
+        {label:'Sunlight %',data:predictions.map(p=>parseFloat(p.sunlight)),borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.3,pointRadius:0},
+        {label:'Current (A)',data:predictions.map(p=>parseFloat(p.current)),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.1)',fill:true,tension:.3,pointRadius:0}
+      ]}, options:{responsive:true,plugins:{legend:{labels:{color:'#a3a3a3'}}},scales:{y:{ticks:{color:'#737373'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#737373',maxTicksLimit:12},grid:{display:false}}}}
+    });
+
+    document.getElementById('predBtn').textContent = '⚡ Run Prediction';
+    document.getElementById('predBtn').disabled = false;
+    if (alerts.length > 0) { APP.toast(`⚠️ ${alerts.length} voltage limit breaks predicted!`, 'error'); }
+    else { APP.toast('✅ All voltage levels within safe range!', 'success'); }
+  }, 1500);
+}
+</script>
+</body>
+</html>

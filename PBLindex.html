@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Solar Smart Home - The Core Four</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo"><div class="sun"></div>Solar Smart Home</div>
+  <button class="mobile-toggle" onclick="APP.mobileToggle()">☰</button>
+  <div class="nav-links">
+    <a href="index.html" class="active">Home</a>
+    <a href="what-it-does.html">What It Does</a>
+    <a href="how-it-extracts.html">How It Works</a>
+    <a href="members.html">Members</a>
+    <a href="leaderboard.html">Leaderboard</a>
+    <a href="graphs.html">Analytics</a>
+    <a href="history.html">History</a>
+    <a href="prediction.html">Predictions</a>
+    <a href="admin.html" class="auth-link">Admin</a>
+  </div>
+  <div class="nav-user">
+    <span class="nav-username"></span>
+    <a href="login.html" class="btn btn-primary btn-sm auth-link">Login</a>
+    <a href="dashboard.html" class="btn btn-secondary btn-sm user-link hidden">Dashboard</a>
+    <button onclick="APP.logout()" class="btn btn-ghost btn-sm user-link hidden">Logout</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="solar-float" style="top:10%;left:5%">☀️</div>
+  <div class="solar-float" style="bottom:15%;right:8%;animation-delay:2s">🔋</div>
+  <div class="solar-float" style="top:30%;right:15%;font-size:80px;animation-delay:4s">⚡</div>
+  <div style="position:relative;z-index:1;padding:0 24px">
+    <div class="badge badge-amber fade-up" style="margin-bottom:24px">✨ Mathematics • Project-Based Learning</div>
+    <h1 class="fade-up fade-up-d1">Smarter Math.<br><span class="accent">Smarter Homes.</span><br>Cleaner Planet.</h1>
+    <p class="fade-up fade-up-d2">Enter your daily electricity usage and watch algebra calculate the exact number of solar panels you need, your savings, and your impact on the planet — instantly.</p>
+    <div class="hero-buttons fade-up fade-up-d3">
+      <a href="register.html" class="btn btn-primary" style="font-size:16px;padding:16px 36px">⚡ Get Started Free</a>
+      <a href="what-it-does.html" class="btn btn-secondary">Learn More →</a>
+    </div>
+
+    <div class="stat-grid fade-up fade-up-d4" style="max-width:700px;margin:60px auto 0">
+      <div class="stat-box">
+        <div class="num" data-count="1247">0</div>
+        <div class="label">Calculations Done</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" data-count="389">0</div>
+        <div class="label">Users Registered</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" data-count="52">0</div>
+        <div class="label">Tonnes CO₂ Saved</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="position:relative;z-index:1">
+  <div class="container">
+    <div class="glow-line"></div>
+    <div class="text-center mb-8">
+      <div class="badge badge-amber" style="margin-bottom:16px">How It Flows</div>
+      <h2 class="section-title">From Usage to <span class="text-accent">Impact</span></h2>
+      <p class="section-sub" style="margin:12px auto 0">Four simple steps. One powerful algebra engine.</p>
+    </div>
+    <div class="steps">
+      <div class="card step fade-up"><h3>📊 Daily Usage Input</h3><p>Enter your kWh consumption or list appliances with usage hours.</p></div>
+      <div class="card step fade-up fade-up-d1"><h3>🧮 Algebra Engine</h3><p>N = E ÷ (P × S) — the formula solves for exact panel count needed.</p></div>
+      <div class="card step fade-up fade-up-d2"><h3>💰 Cost & Savings</h3><p>Electricity cost projected, annual savings after solar switch revealed.</p></div>
+      <div class="card step fade-up fade-up-d3"><h3>🌍 Environmental Impact</h3><p>CO₂ reduction estimate shows your real-world eco benefit.</p></div>
+    </div>
+
+    <div class="glow-line"></div>
+    <div class="text-center mb-8">
+      <div class="badge badge-green" style="margin-bottom:16px">Cross-Curricular</div>
+      <h2 class="section-title">One Project, <span class="text-green">Four Subjects</span></h2>
+    </div>
+    <div class="card-grid">
+      <div class="card fade-up" style="border-left:3px solid var(--accent)">
+        <h3 style="margin-bottom:8px">📐 Mathematics</h3>
+        <p style="font-size:13px;color:var(--text2);line-height:1.6">Algebraic formulas calculate the exact number of panels, cost, and savings from raw usage data.</p>
+      </div>
+      <div class="card fade-up fade-up-d1" style="border-left:3px solid var(--green)">
+        <h3 style="margin-bottom:8px">🔬 Science</h3>
+        <p style="font-size:13px;color:var(--text2);line-height:1.6">Applies concepts of solar energy, power output, and energy conversion to real household needs.</p>
+      </div>
+      <div class="card fade-up fade-up-d2" style="border-left:3px solid #8b5cf6">
+        <h3 style="margin-bottom:8px">💻 Technology</h3>
+        <p style="font-size:13px;color:var(--text2);line-height:1.6">Turns the math into an interactive digital tool that instantly computes results for any input.</p>
+      </div>
+      <div class="card fade-up fade-up-d3" style="border-left:3px solid #06b6d4">
+        <h3 style="margin-bottom:8px">🌿 Sustainability</h3>
+        <p style="font-size:13px;color:var(--text2);line-height:1.6">Highlights how smarter solar decisions reduce carbon footprint and support clean energy adoption.</p>
+      </div>
+    </div>
+
+    <div class="glow-line"></div>
+    <div class="text-center" style="padding:40px 0">
+      <p style="font-size:14px;color:var(--muted)">Grade VII • Mathematics Project-Based Learning</p>
+      <p style="font-size:16px;color:var(--text2);margin-top:12px"><strong class="text-accent">THE CORE FOUR</strong> — Aashman Bhardwaj • Prayag Bachani • Maanya Singh Parihar • Erra Sen</p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.num[data-count]').forEach(el => {
+    APP.animateCounter(el, parseInt(el.dataset.count), 2500);
+  });
+});
+</script>
+</body>
+</html>

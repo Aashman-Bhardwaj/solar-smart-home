@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard - Solar Smart Home</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo"><div class="sun"></div>Solar Smart Home</div>
+  <button class="mobile-toggle" onclick="APP.mobileToggle()">☰</button>
+  <div class="nav-links">
+    <a href="index.html">Home</a><a href="graphs.html">Analytics</a><a href="history.html">History</a>
+    <a href="prediction.html">Predictions</a><a href="leaderboard.html">Leaderboard</a>
+  </div>
+  <div class="nav-user">
+    <span class="nav-username"></span>
+    <a href="dashboard.html" class="btn btn-secondary btn-sm user-link hidden">Dashboard</a>
+    <button onclick="APP.logout()" class="btn btn-ghost btn-sm user-link hidden">Logout</button>
+  </div>
+</nav>
+
+<div class="container" id="mainContent" style="display:none">
+  <div class="page-header fade-up">
+    <div class="badge badge-amber">⚡ Solar Calculator</div>
+    <h1 class="section-title">Calculate Your <span class="text-accent">Solar Setup</span></h1>
+    <p class="section-sub">Enter your daily electricity consumption and let algebra do the rest.</p>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start" class="fade-up fade-up-d1">
+    <div class="card" id="calcCard">
+      <h3 style="font-size:18px;font-weight:600;margin-bottom:20px">📊 Input Your Usage</h3>
+      <div class="input-group">
+        <label>Daily Energy Consumption (kWh)</label>
+        <input type="number" id="dailyKWh" placeholder="e.g. 10" step="0.1" min="0.1" value="10">
+      </div>
+      <div class="input-group">
+        <label>Panel Output (kW) — default 0.4kW (400W)</label>
+        <input type="number" id="panelOutput" placeholder="0.4" step="0.01" min="0.1" value="0.4">
+      </div>
+      <div class="input-group">
+        <label>Average Daily Sunlight Hours — default 5h</label>
+        <input type="number" id="sunHours" placeholder="5" step="0.5" min="1" max="12" value="5">
+      </div>
+      <button onclick="runCalculation()" class="btn btn-primary w-full" style="justify-content:center;padding:16px;font-size:15px" id="calcBtn">🧮 Calculate Solar Setup</button>
+
+      <div class="formula-box mt-4">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">The Formula</div>
+        <div class="formula">N = E ÷ (P × S)</div>
+        <div class="desc">N = Panels | E = Daily kWh | P = Panel kW | S = Sun Hours</div>
+      </div>
+    </div>
+
+    <div id="resultsArea" style="display:none">
+      <div class="result-card mb-4">
+        <div class="big-num" id="resPanels">0</div>
+        <div class="big-label">Solar Panels Needed</div>
+      </div>
+      <div class="card-grid" style="grid-template-columns:1fr 1fr">
+        <div class="card text-center">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Annual Cost (Grid)</div>
+          <div style="font-size:24px;font-weight:700;color:var(--red)" id="resCost">₹0</div>
+        </div>
+        <div class="card text-center">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Annual Savings</div>
+          <div style="font-size:24px;font-weight:700;color:var(--green)" id="resSavings">₹0</div>
+        </div>
+        <div class="card text-center">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">CO₂ Reduction</div>
+          <div style="font-size:24px;font-weight:700;color:#06b6d4" id="resCO2">0 kg</div>
+        </div>
+        <div class="card text-center">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:8px">Current Generated</div>
+          <div style="font-size:24px;font-weight:700;color:var(--accent)" id="resCurrent">0 A</div>
+        </div>
+      </div>
+      <div class="chart-container mt-4">
+        <h3>Cost Comparison</h3>
+        <canvas id="costChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let costChartInstance = null;
+const session = APP.requireAuth();
+
+function runCalculation() {
+  const kwh = parseFloat(document.getElementById('dailyKWh').value);
+  const panel = parseFloat(document.getElementById('panelOutput').value);
+  const sun = parseFloat(document.getElementById('sunHours').value);
+  if (!kwh || kwh <= 0) { APP.toast('Enter valid daily consumption!', 'error'); return; }
+
+  const btn = document.getElementById('calcBtn');
+  btn.textContent = '🌀 Algebra engine processing...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    const result = APP.calculate(kwh, panel, sun);
+    APP.saveCalculation(result);
+
+    document.getElementById('resultsArea').style.display = 'block';
+    APP.animateCounter(document.getElementById('resPanels'), result.panelsNeeded, 1000);
+    document.getElementById('resCost').textContent = '₹' + result.annualCost.toLocaleString();
+    document.getElementById('resSavings').textContent = '₹' + Math.max(0, result.annualSavings).toLocaleString();
+    document.getElementById('resCO2').textContent = result.co2Reduction.toFixed(0) + ' kg';
+    document.getElementById('resCurrent').textContent = result.currentGenerated.toFixed(1) + ' A';
+
+    if (costChartInstance) costChartInstance.destroy();
+    costChartInstance = new Chart(document.getElementById('costChart'), {
+      type: 'bar',
+      data: {
+        labels: ['Grid Cost', 'Solar Cost', 'Annual Savings'],
+        datasets: [{
+          data: [result.annualCost, result.annualSolarCost, Math.max(0, result.annualSavings)],
+          backgroundColor: ['rgba(239,68,68,.6)', 'rgba(245,158,11,.6)', 'rgba(16,185,129,.6)'],
+          borderColor: ['#ef4444', '#f59e0b', '#10b981'],
+          borderWidth: 1, borderRadius: 8
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#737373' }, grid: { color: 'rgba(255,255,255,.05)' } }, x: { ticks: { color: '#a3a3a3' }, grid: { display: false } } } }
+    });
+
+    btn.textContent = '🧮 Calculate Solar Setup';
+    btn.disabled = false;
+    APP.confetti();
+    APP.toast(`${result.panelsNeeded} panels needed! Saved to history.`, 'success');
+  }, 1500);
+}
+
+if (session) {
+  document.getElementById('mainContent').style.display = 'block';
+  APP.updateNav();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Register - Solar Smart Home</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav class="nav">
+  <div class="nav-logo"><div class="sun"></div>Solar Smart Home</div>
+  <button class="mobile-toggle" onclick="APP.mobileToggle()">☰</button>
+  <div class="nav-links">
+    <a href="index.html">Home</a><a href="what-it-does.html">What It Does</a><a href="members.html">Members</a><a href="leaderboard.html">Leaderboard</a>
+  </div>
+  <div class="nav-user">
+    <a href="login.html" class="btn btn-ghost btn-sm">Login</a>
+  </div>
+</nav>
+
+<div class="container-sm" style="display:flex;align-items:center;min-height:100vh">
+  <div style="width:100%">
+    <div class="text-center mb-8 fade-up">
+      <div style="width:80px;height:80px;background:linear-gradient(135deg,var(--accent),var(--accent-d));border-radius:50%;margin:0 auto 24px;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 0 60px var(--glow);animation:rainbow 4s linear infinite">🌞</div>
+      <h1 style="font-size:32px;font-weight:600;margin-bottom:8px">Join Solar Smart Home</h1>
+      <p style="color:var(--text2);font-size:14px">Create your account and start calculating solar savings</p>
+    </div>
+    <div class="card fade-up fade-up-d1" id="regCard">
+      <form onsubmit="handleRegister(event)">
+        <div class="input-group">
+          <label>Full Name</label>
+          <input type="text" id="fullname" placeholder="Your full name" required>
+        </div>
+        <div class="input-group">
+          <label>Username</label>
+          <input type="text" id="username" placeholder="Choose a username" required autocomplete="username">
+        </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Choose a password (4+ chars)" required autocomplete="new-password">
+        </div>
+        <div class="input-group">
+          <label>Country Code</label>
+          <select id="country">
+            <option value="IN">🇮🇳 India</option><option value="US">🇺🇸 USA</option><option value="GB">🇬🇧 UK</option>
+            <option value="DE">🇩🇪 Germany</option><option value="JP">🇯🇵 Japan</option><option value="AU">🇦🇺 Australia</option>
+            <option value="BR">🇧🇷 Brazil</option><option value="CN">🇨🇳 China</option><option value="AE">🇦🇪 UAE</option>
+            <option value="OTHER">🌍 Other</option>
+          </select>
+        </div>
+        <div id="regError" class="hidden" style="color:var(--red);font-size:13px;margin-bottom:16px;padding:12px;background:rgba(239,68,68,.1);border-radius:8px;border:1px solid rgba(239,68,68,.2)"></div>
+        <button type="submit" class="btn btn-primary w-full" style="justify-content:center;padding:16px" id="regBtn">⚡ Create Account</button>
+      </form>
+      <div style="text-align:center;margin-top:20px">
+        <p style="font-size:13px;color:var(--muted)">Already have an account? <a href="login.html" style="color:var(--accent);font-weight:500">Login here</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function handleRegister(e) {
+  e.preventDefault();
+  const btn = document.getElementById('regBtn');
+  const errEl = document.getElementById('regError');
+  errEl.classList.add('hidden');
+  btn.textContent = '🌀 Creating your solar profile...';
+  btn.disabled = true;
+  setTimeout(() => {
+    const result = APP.register(
+      document.getElementById('username').value.trim(),
+      document.getElementById('password').value,
+      document.getElementById('fullname').value.trim()
+    );
+    if (result.error) {
+      errEl.textContent = result.error; errEl.classList.remove('hidden');
+      btn.textContent = '⚡ Create Account'; btn.disabled = false;
+    } else {
+      APP.loadDB();
+      const user = APP.db.users.find(u => u.username === document.getElementById('username').value.trim());
+      if(user) user.country = document.getElementById('country').value;
+      APP.saveDB();
+      btn.textContent = '🎉 Account Created!';
+      btn.style.background = 'var(--green)';
+      APP.confetti();
+      APP.toast('Account created! Redirecting to login...', 'success');
+      setTimeout(() => window.location.href = 'login.html', 1500);
+    }
+  }, 1500);
+}
+</script>
+</body>
+</html>
