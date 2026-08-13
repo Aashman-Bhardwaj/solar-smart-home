@@ -27,14 +27,12 @@
     <h1 class="section-title">Calculation <span class="text-green">History</span></h1>
     <p class="section-sub">Every calculation you've made, tracked and visualized over time.</p>
   </div>
-
   <div id="noHistory" class="card text-center fade-up" style="padding:60px">
     <div style="font-size:64px;margin-bottom:16px">📭</div>
     <h3 style="margin-bottom:8px">No Calculations Yet</h3>
     <p style="color:var(--text2);font-size:14px;margin-bottom:24px">Head to the dashboard and run your first solar calculation!</p>
     <a href="dashboard.html" class="btn btn-primary">Go to Calculator →</a>
   </div>
-
   <div id="historyContent" style="display:none">
     <div class="stat-grid fade-up">
       <div class="stat-box"><div class="num" id="totalCalcs">0</div><div class="label">Total Calculations</div></div>
@@ -42,18 +40,10 @@
       <div class="stat-box"><div class="num" id="totalSavings">₹0</div><div class="label">Total Savings Found</div></div>
       <div class="stat-box"><div class="num" id="totalCO2">0</div><div class="label">Total CO₂ Reduced (kg)</div></div>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px">
-      <div class="chart-container fade-up fade-up-d1">
-        <h3>📊 Panels Needed Over Time</h3>
-        <canvas id="historyChart1" height="200"></canvas>
-      </div>
-      <div class="chart-container fade-up fade-up-d2">
-        <h3>💰 Savings Trend</h3>
-        <canvas id="historyChart2" height="200"></canvas>
-      </div>
+      <div class="chart-container fade-up fade-up-d1"><h3>📊 Panels Needed Over Time</h3><canvas id="historyChart1" height="200"></canvas></div>
+      <div class="chart-container fade-up fade-up-d2"><h3>💰 Savings Trend</h3><canvas id="historyChart2" height="200"></canvas></div>
     </div>
-
     <div class="glow-line"></div>
     <h3 style="font-size:18px;font-weight:600;margin-bottom:16px" class="fade-up fade-up-d3">📋 Detailed History</h3>
     <div class="table-wrap fade-up fade-up-d4">
@@ -65,44 +55,46 @@
   </div>
 </div>
 
+<script src="app.js"></script>
 <script>
-const session = APP.requireAuth();
-if (session) {
+document.addEventListener('DOMContentLoaded', function() {
+  var session = APP.requireAuth();
+  if (!session) return;
   APP.updateNav();
-  const history = APP.getHistory(session.userId);
+  var history = APP.getHistory(session.userId);
   if (history.length === 0) {
     document.getElementById('noHistory').style.display = 'block';
   } else {
     document.getElementById('noHistory').style.display = 'none';
     document.getElementById('historyContent').style.display = 'block';
-    const totalCalcs = history.length;
-    const avgPanels = (history.reduce((s,c)=>s+c.panelsNeeded,0)/totalCalcs).toFixed(1);
-    const totalSavings = history.reduce((s,c)=>s+Math.max(0,c.annualSavings),0);
-    const totalCO2 = history.reduce((s,c)=>s+c.co2Reduction,0).toFixed(0);
+    var totalCalcs = history.length;
+    var avgPanels = (history.reduce(function(s,c){return s+c.panelsNeeded;},0)/totalCalcs).toFixed(1);
+    var totalSavings = history.reduce(function(s,c){return s+Math.max(0,c.annualSavings);},0);
+    var totalCO2 = history.reduce(function(s,c){return s+c.co2Reduction;},0).toFixed(0);
     APP.animateCounter(document.getElementById('totalCalcs'), totalCalcs, 1000);
     document.getElementById('avgPanels').textContent = avgPanels;
     document.getElementById('totalSavings').textContent = '₹' + totalSavings.toLocaleString();
     document.getElementById('totalCO2').textContent = totalCO2;
-
-    const labels = history.slice(-10).map(c => new Date(c.timestamp).toLocaleDateString());
-    const panelsData = history.slice(-10).map(c => c.panelsNeeded);
-    const savingsData = history.slice(-10).map(c => Math.max(0,c.annualSavings));
-
+    var sliced = history.slice(-10);
+    var labels = sliced.map(function(c){return new Date(c.timestamp).toLocaleDateString();});
+    var panelsData = sliced.map(function(c){return c.panelsNeeded;});
+    var savingsData = sliced.map(function(c){return Math.max(0,c.annualSavings);});
     new Chart(document.getElementById('historyChart1'), {
-      type:'line', data:{labels, datasets:[{label:'Panels',data:panelsData,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#f59e0b'}]},
+      type:'line', data:{labels:labels, datasets:[{label:'Panels',data:panelsData,borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.1)',fill:true,tension:.4,pointRadius:5,pointBackgroundColor:'#f59e0b'}]},
       options:{responsive:true,plugins:{legend:{labels:{color:'#a3a3a3'}}},scales:{y:{ticks:{color:'#737373'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#737373'},grid:{display:false}}}}
     });
     new Chart(document.getElementById('historyChart2'), {
-      type:'bar', data:{labels, datasets:[{label:'Savings (₹)',data:savingsData,backgroundColor:'rgba(16,185,129,.5)',borderColor:'#10b981',borderWidth:1,borderRadius:6}]},
+      type:'bar', data:{labels:labels, datasets:[{label:'Savings (₹)',data:savingsData,backgroundColor:'rgba(16,185,129,.5)',borderColor:'#10b981',borderWidth:1,borderRadius:6}]},
       options:{responsive:true,plugins:{legend:{labels:{color:'#a3a3a3'}}},scales:{y:{ticks:{color:'#737373'},grid:{color:'rgba(255,255,255,.05)'}},x:{ticks:{color:'#737373'},grid:{display:false}}}}
     });
-
-    const tbody = document.getElementById('historyTable');
-    history.forEach((c,i) => {
-      tbody.innerHTML += `<tr><td>${i+1}</td><td>${new Date(c.timestamp).toLocaleString()}</td><td>${c.dailyKWh} kWh</td><td><span class="badge badge-amber">${c.panelsNeeded}</span></td><td style="color:var(--green)">₹${Math.max(0,c.annualSavings).toLocaleString()}</td><td style="color:#06b6d4">${c.co2Reduction.toFixed(0)} kg</td></tr>`;
+    var tbody = document.getElementById('historyTable');
+    history.forEach(function(c,i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>'+(i+1)+'</td><td>'+new Date(c.timestamp).toLocaleString()+'</td><td>'+c.dailyKWh+' kWh</td><td><span class="badge badge-amber">'+c.panelsNeeded+'</span></td><td style="color:var(--green)">₹'+Math.max(0,c.annualSavings).toLocaleString()+'</td><td style="color:#06b6d4">'+c.co2Reduction.toFixed(0)+' kg</td>';
+      tbody.appendChild(tr);
     });
   }
-}
+});
 </script>
 </body>
 </html>
